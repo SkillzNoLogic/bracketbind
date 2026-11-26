@@ -1,0 +1,17 @@
+{
+  "name": "bracket-maker",
+  "private": true,
+  "version": "2.1.0",
+  "description": "Tournament Hub — multi-format bracket manager (Tauri)",
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:mac-universal": "tauri build --target universal-apple-darwin",
+    "tauri": "tauri",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.6"
+  }
+}

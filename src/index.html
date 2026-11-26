@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bracket Maker</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="js/app.js"></script>
+</head>
+<body>
+    <div class="ambient"><i></i><i></i><i></i><i></i></div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#34c759" />
+                <stop offset="1" stop-color="#0a84ff" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass">
+        <div class="sidebar-drag" data-tauri-drag-region></div>
+        <div class="brand">
+            <div class="brand-mark"><i data-icon="trophy"></i></div>
+            <div><b>Bracket Maker</b><small>Tournament Hub</small></div>
+        </div>
+        <nav class="nav">
+            <button class="nav-item" data-action="go" data-view="home"><i data-icon="home"></i><span>Home</span></button>
+            <button class="nav-item" data-action="new-tournament" data-nav="setup"><i data-icon="plus"></i><span>New Tournament</span></button>
+            <div class="nav-title">Current</div>
+            <div id="nav-current"></div>
+            <div class="nav-title">Library</div>
+            <button class="nav-item" data-action="go" data-view="history"><i data-icon="history"></i><span>History</span><span class="badge-num" id="nav-history-count"></span></button>
+            <button class="nav-item" data-action="go" data-view="data"><i data-icon="folder"></i><span>Import &amp; Export</span></button>
+            <button class="nav-item" data-action="go" data-view="settings"><i data-icon="settings"></i><span>Settings</span></button>
+        </nav>
+        <div class="live-card" id="live-card"></div>
+    </aside>
+
+    <div class="main">
+        <header class="toolbar" data-tauri-drag-region>
+            <div class="toolbar-title" id="toolbar-title" data-tauri-drag-region></div>
+            <div class="toolbar-actions">
+                <div id="toolbar-dynamic" class="row"></div>
+                <span class="save-indicator" id="save-status" data-state="idle"><span class="dot"></span><span class="label">Saved</span></span>
+                <button class="icon-btn" data-action="toggle-theme" title="Toggle appearance"><i data-icon="contrast"></i></button>
+            </div>
+        </header>
+
+        <div class="page-scroll" id="page-scroll">
+
+            <!-- HOME -->
+            <section class="view" id="view-home">
+                <div class="page-head">
+                    <div>
+                        <h1 class="large-title">Tournaments</h1>
+                        <p class="subtitle" id="home-sub"></p>
+                    </div>
+                </div>
+                <div id="home-hero"></div>
+                <div class="tiles">
+                    <button class="tile glass" data-action="new-tournament">
+                        <span class="app-icon blue"><i data-icon="plus"></i></span>
+                        <div><b>New Tournament</b><small>Players, check-in and seeding</small></div>
+                        <kbd data-shortcut="N"></kbd>
+                    </button>
+                    <button class="tile glass" data-action="go" data-view="history">
+                        <span class="app-icon orange"><i data-icon="history"></i></span>
+                        <div><b>History</b><small id="tile-history-sub">Saved tournaments</small></div>
+                        <kbd data-shortcut="3"></kbd>
+                    </button>
+                    <button class="tile glass" data-action="go" data-view="data">
+                        <span class="app-icon green"><i data-icon="folder"></i></span>
+                        <div><b>Import &amp; Export</b><small>Backups and sharing codes</small></div>
+                        <kbd data-shortcut="4"></kbd>
+                    </button>
+                    <button class="tile glass" data-action="open-live">
+                        <span class="app-icon purple"><i data-icon="broadcast"></i></span>
+                        <div><b>Live Website</b><small id="tile-live-sub">Share on your network</small></div>
+                        <kbd data-shortcut="L"></kbd>
+                    </button>
+                </div>
+                <div id="home-recent"></div>
+            </section>
+
+            <!-- SETUP -->
+            <section class="view" id="view-setup">
+                <div class="page-head"><div><h1 class="large-title">New Tournament</h1><p class="subtitle">Four quick steps and you’re playing.</p></div></div>
+                <div class="wizard glass-strong">
+                    <ol class="stepper" id="stepper">
+                        <li data-step="details"><span>1</span>Details</li>
+                        <li data-step="players"><span>2</span>Players</li>
+                        <li data-step="checkin"><span>3</span>Check-in</li>
+                        <li data-step="seeding"><span>4</span>Seeding</li>
+                    </ol>
+
+                    <div class="step" data-step="details">
+                        <div class="form">
+                            <label class="field">
+                                <span>Name</span>
+                                <input class="input" type="text" id="setup-name" placeholder="Friday Night Showdown" autocomplete="off" spellcheck="false">
+                            </label>
+                            <div class="field">
+                                <span>Format</span>
+                                <div class="format-cards" id="setup-format">
+                                    <button type="button" class="format-card" data-format="rr">
+                                        <div class="diagram"><svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="60" cy="8" r="4" fill="currentColor"/><circle cx="96" cy="22" r="4" fill="currentColor"/><circle cx="82" cy="44" r="4" fill="currentColor"/><circle cx="38" cy="44" r="4" fill="currentColor"/><circle cx="24" cy="22" r="4" fill="currentColor"/><path d="M60 8 96 22 82 44 38 44 24 22Z M60 8 82 44 M60 8 38 44 M96 22 38 44 M96 22 24 22 M82 44 24 22" opacity=".55"/></svg></div>
+                                        <strong>Round Robin</strong><small>Everyone plays everyone</small>
+                                    </button>
+                                    <button type="button" class="format-card" data-format="swiss">
+                                        <div class="diagram"><svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="8" y="6" width="26" height="8" rx="4" fill="currentColor" opacity=".8"/><rect x="8" y="20" width="26" height="8" rx="4" fill="currentColor" opacity=".8"/><rect x="8" y="34" width="26" height="8" rx="4" fill="currentColor" opacity=".8"/><rect x="47" y="10" width="26" height="8" rx="4" fill="currentColor" opacity=".6"/><rect x="47" y="30" width="26" height="8" rx="4" fill="currentColor" opacity=".6"/><rect x="86" y="20" width="26" height="8" rx="4" fill="currentColor" opacity=".4"/><path d="M34 10h6l4 4h3M34 24h6l4-10M34 38h6l4-4h3M73 14h6l4 10h3M73 34h6l4-10" opacity=".55"/></svg></div>
+                                        <strong>Swiss</strong><small>Paired by record each round</small>
+                                    </button>
+                                    <button type="button" class="format-card" data-format="se">
+                                        <div class="diagram"><svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h22v10H6M6 20h22v10H6M6 35h22v10H6" opacity=".9"/><path d="M28 10h8v15h-8M28 40h8V25" /><path d="M36 17h14M36 32h14"/><path d="M50 10h22v15H50M50 25v12h22V25"/><path d="M72 17h8v14h-8M80 24h12"/><path d="M92 18h22v12H92z" fill="currentColor" opacity=".35"/></svg></div>
+                                        <strong>Single Elimination</strong><small>Lose once and you’re out</small>
+                                    </button>
+                                    <button type="button" class="format-card" data-format="de">
+                                        <div class="diagram"><svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h20v7H6M6 14h20v7H6M26 7h6v10h-6M32 12h14"/><path d="M46 8h20v8H46" /><path d="M6 31h20v7H6M6 41h20v7H6M26 34h6v10h-6M32 39h14" opacity=".55"/><path d="M46 35h20v8H46" opacity=".55"/><path d="M66 12h8v27h-8M74 25h12"/><path d="M86 19h28v12H86z" fill="currentColor" opacity=".35"/></svg></div>
+                                        <strong>Double Elimination</strong><small>Winners &amp; losers brackets</small>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <span>Series length</span>
+                                <div class="length-picker" id="setup-length">
+                                    <button type="button" data-first-to="1"><b>Bo1</b><small>First to 1</small></button>
+                                    <button type="button" data-first-to="2"><b>Bo3</b><small>First to 2</small></button>
+                                    <button type="button" data-first-to="3"><b>Bo5</b><small>First to 3</small></button>
+                                    <button type="button" data-first-to="4"><b>Bo7</b><small>First to 4</small></button>
+                                    <button type="button" data-first-to="5"><b>Bo9</b><small>First to 5</small></button>
+                                </div>
+                            </div>
+                            <div class="option-row" id="opt-third">
+                                <div><strong>Third-place match</strong><span>The two semifinal losers play for 3rd.</span></div>
+                                <label class="switch"><input type="checkbox" id="setup-third"><span></span></label>
+                            </div>
+                        </div>
+                        <div class="step-actions">
+                            <button class="btn" data-action="go" data-view="home">Cancel</button>
+                            <button class="btn prominent" data-action="setup-next">Continue <i data-icon="chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="step" data-step="players">
+                        <div class="step-head">
+                            <h2>Players <span class="count-pill" id="player-count">0</span></h2>
+                            <div class="row wrap">
+                                <select id="saved-roster-select"></select>
+                                <button class="btn small" data-action="load-saved-roster">Load</button>
+                                <button class="btn small" data-action="use-default-roster">Default roster</button>
+                                <button class="btn small plain destructive" data-action="clear-roster">Clear</button>
+                            </div>
+                        </div>
+                        <p class="hint">Press <kbd>Return</kbd> for the next player, or paste a whole list at once.</p>
+                        <div class="entry-grid" id="setup-player-list"></div>
+                        <div class="step-actions">
+                            <button class="btn" data-action="setup-back">Back</button>
+                            <button class="btn prominent" data-action="setup-next">Continue <i data-icon="chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="step" data-step="checkin">
+                        <div class="step-head">
+                            <h2>Check-in <span class="count-pill" id="checkin-count">0</span></h2>
+                            <div class="row">
+                                <button class="btn small" data-action="checkin-all" data-value="1">Check all</button>
+                                <button class="btn small" data-action="checkin-all" data-value="0">Uncheck all</button>
+                            </div>
+                        </div>
+                        <p class="hint">Only checked-in players are entered into the bracket.</p>
+                        <div class="checkin-grid" id="checkin-list"></div>
+                        <div class="step-actions">
+                            <button class="btn" data-action="setup-back">Back</button>
+                            <button class="btn prominent" data-action="setup-next">Continue <i data-icon="chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="step" data-step="seeding">
+                        <div class="step-head">
+                            <h2>Seeding</h2>
+                            <div class="row">
+                                <button class="btn small" data-action="randomize-seeds"><i data-icon="shuffle"></i> Shuffle</button>
+                                <button class="btn small" data-action="alpha-seeds">A–Z</button>
+                            </div>
+                        </div>
+                        <p class="hint">Drag rows or use the arrows. The top player is seed 1.</p>
+                        <div class="option-row" id="opt-rounds" style="margin-bottom:12px">
+                            <div><strong>Swiss rounds</strong><span id="rounds-hint"></span></div>
+                            <select id="setup-rounds"></select>
+                        </div>
+                        <div class="seed-list" id="seeding-list"></div>
+                        <div class="step-actions">
+                            <button class="btn" data-action="setup-back">Back</button>
+                            <button class="btn prominent large" data-action="launch-tournament"><i data-icon="play"></i> Start Tournament</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOURNAMENT -->
+            <section class="view" id="view-active">
+                <div class="t-head">
+                    <div>
+                        <button class="title-edit" data-action="rename-tournament" title="Rename tournament">
+                            <h1 class="large-title" id="active-title">Tournament</h1><i data-icon="pencil"></i>
+                        </button>
+                        <div class="chips" id="active-chips"></div>
+                    </div>
+                </div>
+                <div class="progress"><div class="fill" id="active-progress"></div></div>
+                <div class="tabs-row">
+                    <div class="segmented glass" id="tabs">
+                        <span class="seg-thumb"></span>
+                        <button data-tab="matches"><i data-icon="list"></i>Matches</button>
+                        <button data-tab="bracket" id="tab-bracket"><i data-icon="bracket"></i><span>Bracket</span></button>
+                        <button data-tab="standings"><i data-icon="chart"></i>Standings</button>
+                        <button data-tab="players"><i data-icon="users"></i>Players</button>
+                    </div>
+                    <div id="final-btn-wrap"></div>
+                </div>
+
+                <div class="tab-panel" data-tab="matches">
+                    <div class="matches-layout">
+                        <div>
+                            <div id="upnext-wrap">
+                                <div class="sub-title"><i data-icon="play"></i>Up next</div>
+                                <div id="upnext"></div>
+                            </div>
+                            <div class="filters">
+                                <label class="search"><i data-icon="search"></i><input class="input" type="search" id="search-input" placeholder="Filter by player" autocomplete="off"></label>
+                                <select id="round-filter"></select>
+                                <label class="toggle-chip"><input type="checkbox" id="hide-done"> Hide finished</label>
+                            </div>
+                            <div id="schedule"></div>
+                        </div>
+                        <div class="side-stack">
+                            <div class="sub-title"><i data-icon="chart"></i>Standings<button class="btn small plain" data-action="tab" data-tab="standings">See All</button></div>
+                            <div class="side-card glass" id="side-standings"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-panel" data-tab="bracket">
+                    <div class="bracket-panel glass" id="bracket"></div>
+                    <p class="list-footer" id="bracket-hint"></p>
+                </div>
+
+                <div class="tab-panel" data-tab="standings">
+                    <div class="row between wrap" style="margin-bottom:12px">
+                        <div class="segmented glass small" id="standings-mode">
+                            <span class="seg-thumb"></span>
+                            <button data-mode="standings">Standings</button>
+                            <button data-mode="points">Game points</button>
+                        </div>
+                        <span class="small tertiary" id="tiebreak-hint"></span>
+                    </div>
+                    <div class="standings-card glass" id="standings-full"></div>
+                </div>
+
+                <div class="tab-panel" data-tab="players">
+                    <div class="list" id="players-list"></div>
+                    <div class="row" style="margin-top:14px">
+                        <button class="btn" data-action="add-player"><i data-icon="user-plus"></i> Add Player</button>
+                        <span class="small tertiary" id="players-summary"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTORY -->
+            <section class="view" id="view-history">
+                <div class="page-head">
+                    <div><h1 class="large-title">History</h1><p class="subtitle" id="history-sub"></p></div>
+                    <div class="row wrap">
+                        <label class="search"><i data-icon="search"></i><input class="input" type="search" id="history-search" placeholder="Search tournaments or players" autocomplete="off"></label>
+                        <div class="segmented glass small" id="history-filter">
+                            <span class="seg-thumb"></span>
+                            <button data-filter="all">All</button>
+                            <button data-filter="live">In Progress</button>
+                            <button data-filter="done">Completed</button>
+                        </div>
+                        <select id="history-sort">
+                            <option value="updated">Recently updated</option>
+                            <option value="created">Recently created</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="history-list"></div>
+                <div class="row end" style="margin-top:14px">
+                    <button class="btn" data-action="export-all-zip"><i data-icon="archive"></i> Download All as .zip</button>
+                </div>
+            </section>
+
+            <!-- DATA -->
+            <section class="view" id="view-data">
+                <div class="page-head"><div><h1 class="large-title">Import &amp; Export</h1><p class="subtitle">Backups, sharing codes and archives.</p></div></div>
+                <div class="data-grid">
+                    <div class="data-card glass">
+                        <h3><span class="app-icon blue"><i data-icon="upload"></i></span>Export a Tournament</h3>
+                        <p class="hint">A backup code you can save as a file or paste into another copy of the app.</p>
+                        <select id="export-select"></select>
+                        <input class="input" type="password" id="export-password" placeholder="Password (optional, encrypts the backup)" autocomplete="new-password">
+                        <div class="row wrap">
+                            <button class="btn prominent" data-action="export-file"><i data-icon="download"></i> Save .txt…</button>
+                            <button class="btn" data-action="export-copy"><i data-icon="copy"></i> Copy Code</button>
+                        </div>
+                        <textarea id="export-output" class="code-box" readonly placeholder="The backup code appears here"></textarea>
+                    </div>
+                    <div class="data-card glass">
+                        <h3><span class="app-icon green"><i data-icon="download"></i></span>Import</h3>
+                        <p class="hint">Open <code>.txt</code> backups or a <code>.zip</code> archive, drop files anywhere on the window, or paste a code.</p>
+                        <button class="drop-target" data-action="import-files"><i data-icon="folder"></i><span>Choose Files… <small>or drag them onto the window</small></span></button>
+                        <textarea id="import-input" class="code-box" placeholder="Paste a THUB backup code"></textarea>
+                        <input class="input" type="password" id="import-password" placeholder="Password (if the backup is encrypted)" autocomplete="off">
+                        <button class="btn prominent" data-action="import-code">Import Code</button>
+                    </div>
+                    <div class="data-card glass span-2">
+                        <h3><span class="app-icon orange"><i data-icon="archive"></i></span>Full Backup</h3>
+                        <p class="hint">Every tournament and setting in one file. Restoring merges it into what you already have.</p>
+                        <div class="row wrap">
+                            <button class="btn" data-action="export-full-backup"><i data-icon="download"></i> Save Full Backup…</button>
+                            <button class="btn" data-action="import-files"><i data-icon="upload"></i> Restore from Backup…</button>
+                            <button class="btn plain" data-action="import-legacy" id="legacy-btn"><i data-icon="history"></i> Import from the old Bracket Maker app</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section class="view" id="view-settings">
+                <div class="page-head"><div><h1 class="large-title">Settings</h1><p class="subtitle">Changes save automatically.</p></div></div>
+
+                <div class="section-title">Appearance</div>
+                <div class="list">
+                    <div class="list-row settings-row">
+                        <span class="app-icon gray"><i data-icon="contrast"></i></span>
+                        <div class="text"><b>Theme</b><small>Follow the system, or always light or dark.</small></div>
+                        <div class="segmented glass small" id="setting-theme">
+                            <span class="seg-thumb"></span>
+                            <button data-theme-choice="system">System</button>
+                            <button data-theme-choice="light">Light</button>
+                            <button data-theme-choice="dark">Dark</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">New Tournament Defaults</div>
+                <div class="list">
+                    <div class="list-row settings-row">
+                        <span class="app-icon blue"><i data-icon="bracket"></i></span>
+                        <div class="text"><b>Format</b></div>
+                        <select id="setting-format">
+                            <option value="rr">Round Robin</option>
+                            <option value="swiss">Swiss</option>
+                            <option value="se">Single Elimination</option>
+                            <option value="de">Double Elimination</option>
+                        </select>
+                    </div>
+                    <div class="list-row settings-row">
+                        <span class="app-icon teal"><i data-icon="flag"></i></span>
+                        <div class="text"><b>Series length</b></div>
+                        <select id="setting-first-to">
+                            <option value="1">Best of 1</option>
+                            <option value="2">Best of 3</option>
+                            <option value="3">Best of 5</option>
+                            <option value="4">Best of 7</option>
+                            <option value="5">Best of 9</option>
+                        </select>
+                    </div>
+                    <div class="list-row settings-row">
+                        <span class="app-icon green"><i data-icon="users"></i></span>
+                        <div class="text"><b>Pre-fill default roster</b><small>Start the Players step with the roster below.</small></div>
+                        <label class="switch"><input type="checkbox" id="setting-roster-enabled"><span></span></label>
+                    </div>
+                    <div class="list-row settings-row column">
+                        <div class="text"><b>Default roster</b><small>One player per line.</small></div>
+                        <textarea id="setting-roster" rows="7" placeholder="One player per line"></textarea>
+                    </div>
+                </div>
+
+                <div class="section-title">Live Website</div>
+                <div class="list">
+                    <div class="list-row settings-row">
+                        <span class="app-icon purple"><i data-icon="broadcast"></i></span>
+                        <div class="text"><b>Share the open tournament on this network</b><small>Anyone on the same Wi-Fi can follow along in a browser. Read-only.</small></div>
+                        <label class="switch"><input type="checkbox" id="setting-live"><span></span></label>
+                    </div>
+                    <div class="list-row settings-row">
+                        <span class="app-icon gray"><i data-icon="globe"></i></span>
+                        <div class="text"><b>Port</b><small id="setting-live-status">Not running</small></div>
+                        <input class="input port" type="number" id="setting-port" min="1024" max="65000" step="1">
+                    </div>
+                </div>
+
+                <div class="section-title">Data</div>
+                <div class="list">
+                    <div class="list-row settings-row">
+                        <span class="app-icon orange"><i data-icon="folder"></i></span>
+                        <div class="text"><b>Data folder</b><small>Saved automatically, with a backup copy and daily snapshots.</small></div>
+                        <button class="btn small" data-action="reveal-data" id="reveal-btn">Show Folder</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Sheets -->
+    <div class="modal" id="modal-player" role="dialog" aria-modal="true">
+        <div class="sheet">
+            <button class="sheet-close" data-action="close-modal"><i data-icon="x"></i></button>
+            <div class="pc-head"><div class="avatar" id="pc-avatar"></div><div><h2 id="pc-name">Player</h2><div class="sheet-sub" id="pc-sub"></div></div></div>
+            <div class="stat-grid" id="pc-stats"></div>
+            <h4>Recent form</h4>
+            <div id="pc-form"></div>
+            <h4>Matches</h4>
+            <div class="history-list" id="pc-history"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-match" role="dialog" aria-modal="true">
+        <div class="sheet">
+            <button class="sheet-close" data-action="close-modal"><i data-icon="x"></i></button>
+            <h2 id="me-title">Match</h2>
+            <div class="sheet-sub" id="me-sub"></div>
+            <div class="match-editor" id="me-body"></div>
+            <div class="sheet-actions">
+                <button class="btn plain destructive" data-action="me-clear">Clear Result</button>
+                <span class="grow"></span>
+                <button class="btn prominent" data-action="close-modal">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-final" role="dialog" aria-modal="true">
+        <div class="sheet wide">
+            <button class="sheet-close" data-action="close-modal"><i data-icon="x"></i></button>
+            <h2>Tournament Complete</h2>
+            <div class="sheet-sub" id="final-sub"></div>
+            <div class="podium" id="final-podium"></div>
+            <div class="list final-list" id="final-list"></div>
+            <div class="sheet-actions">
+                <button class="btn" data-action="export-results"><i data-icon="download"></i> Export Results…</button>
+                <button class="btn" data-action="print"><i data-icon="print"></i> Print</button>
+                <span class="grow"></span>
+                <button class="btn" data-action="close-modal">Back to Tournament</button>
+                <button class="btn prominent" data-action="go" data-view="home">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-quick" role="dialog" aria-modal="true">
+        <div class="sheet">
+            <button class="sheet-close" data-action="close-modal"><i data-icon="x"></i></button>
+            <h2 id="qv-title">Tournament</h2>
+            <div class="chips" id="qv-meta" style="margin-top:10px"></div>
+            <h4>Top standings</h4>
+            <div id="qv-standings"></div>
+            <h4>Roster</h4>
+            <div class="chips" id="qv-roster"></div>
+            <div class="sheet-actions" id="qv-actions"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-live" role="dialog" aria-modal="true">
+        <div class="sheet" style="text-align:center">
+            <button class="sheet-close" data-action="close-modal"><i data-icon="x"></i></button>
+            <h2 style="padding:0 36px">Live Website</h2>
+            <div class="sheet-sub" id="live-sheet-sub">Scan with a phone on the same Wi-Fi network.</div>
+            <div class="qr-box" id="live-qr"></div>
+            <div class="url-big" id="live-url"></div>
+            <div class="small tertiary" id="live-alt" style="margin-top:6px"></div>
+            <div class="sheet-actions" style="justify-content:center">
+                <button class="btn" data-action="copy-live-url"><i data-icon="copy"></i> Copy Link</button>
+                <button class="btn" data-action="open-live-url"><i data-icon="external"></i> Open in Browser</button>
+                <button class="btn plain destructive" data-action="toggle-live" id="live-toggle-btn">Stop Sharing</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-dialog" role="alertdialog" aria-modal="true">
+        <div class="sheet dialog">
+            <span class="app-icon blue" id="dlg-icon"><i data-icon="info"></i></span>
+            <h3 id="dlg-title"></h3>
+            <p id="dlg-body"></p>
+            <input class="input" id="dlg-input" type="text" autocomplete="off">
+            <div class="sheet-actions">
+                <button class="btn" id="dlg-cancel">Cancel</button>
+                <button class="btn prominent" id="dlg-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="drop-overlay" id="drop-overlay">
+        <div class="sheet"><span class="app-icon blue"><i data-icon="download"></i></span><h3>Drop to Import</h3><span class="secondary small">.txt backups, .zip archives or a full .json backup</span></div>
+    </div>
+    <div class="toasts" id="toasts"></div>
+    <div id="print-root"></div>
+</body>
+</html>
